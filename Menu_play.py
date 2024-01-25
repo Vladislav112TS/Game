@@ -1,33 +1,7 @@
 import pygame
 import sys
+from Button_effects import ImageButton
 import os
-from Menu_play import Menu
-
-
-pygame.init()
-pygame.key.set_repeat(100, 35)
-FPS = 25
-WIDTH = 960
-HEIGHT = 600
-STEP = 75
-INDENT = 100
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption('Game')
-FPS1 = 30
-clock = pygame.time.Clock()
-player = None
-skel = None
-atack_enemy = pygame.mixer.Sound('43bdd5ee5d8bd1f.ogg')
-atack_hero = pygame.mixer.Sound('d2ba7c5b783d309.ogg')
-atack_hero2 = pygame.mixer.Sound('b387e6976b28d15.ogg')
-atack_hero3 = pygame.mixer.Sound('razrezayuschiy-udar-mechom.ogg')
-atack_hero4 = pygame.mixer.Sound('promah-pri-boe-na-mechah.ogg')
-all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-box_group = pygame.sprite.Group()
-enemy_group = pygame.sprite.Group()
-cell_group = pygame.sprite.Group()
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('image', name)
@@ -44,72 +18,22 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
-def terminate():
-    pygame.quit()
-    sys.exit()
+pygame.init()
+WIDTH, HEIGHT = 960, 600
+MAX_FPS = 60
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("shogun showdown")
+main_background = load_image('shogun-showdown.jpg')
+main_background2 = load_image('main_background2.jpg')
+main_background3 = load_image('main_background3.jpg')
+level_passed = load_image('level_passed.jpg')
+clock = pygame.time.Clock()
+cursor = load_image('cursor.png')
+pygame.mouse.set_visible(False)
+victory_music = pygame.mixer.Sound('db344f8d1a8d5b5.ogg')
+loss_music = pygame.mixer.Sound('z_uki-mech-_-telo.ogg')
+all_sprites = pygame.sprite.Group()
 
-tile_images = {
-    'white_string': load_image('white_string.png', -1)
-}
-my_menu = Menu()
-my_menu.main_menu()
-
-tile_width = tile_height = 75
-
-class Cell(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites, cell_group)
-        self.image = pygame.transform.scale(tile_images[tile_type], (tile_width, tile_height))
-        self.rect = pygame.Rect(0, 0, tile_width + 1, tile_height + 1)
-        self.rect.x, self.rect.y = tile_width * pos_x + INDENT, tile_height * 5 + tile_height // 2
-
-class Tile(pygame.sprite.Sprite):
-    def __init__(self, tile_type, pos_x, pos_y):
-        super().__init__(tiles_group, all_sprites)
-        self.image = pygame.transform.scale(tile_images[tile_type], (tile_width, tile_height))
-
-        self.rect = self.image.get_rect().move(
-            tile_width * pos_x + INDENT, tile_height * 5)
-
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(enemy_group, all_sprites)
-        self.image = pygame.transform.scale(my_menu.skel_image, (tile_width - 25, tile_height - 15))
-        self.rect = pygame.Rect(0, 0, tile_width + 1, tile_height + 1)
-        self.rect.x, self.rect.y = tile_width * pos_x + 15 + INDENT, tile_height * 5 + 5
-        self.vx = 0
-        self.vy = 0
-        self.health = 4
-
-    def set_health_enemy(self, health):
-        self.health = health
-
-    def update(self):
-        if not pygame.sprite.spritecollideany(self, box_group):
-            self.rect = self.rect.move(self.vx, self.vy)
-
-class Player(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y):
-        super().__init__(player_group, all_sprites)
-        self.image = pygame.transform.scale(my_menu.player_image, (tile_width - 15, tile_height - 15))
-        self.rect = pygame.Rect(0, 0, tile_width + 1, tile_height + 1)
-        self.rect.x, self.rect.y = tile_width * pos_x + 15 + INDENT, tile_height * 5 + 5
-        self.vx = 0
-        self.vy = 0
-        self.health = 5
-
-    def set_health_player(self, health):
-        self.health = health
-
-    def change_skin(self, player_image):
-        self.image = pygame.transform.scale(player_image, (tile_width - 15, tile_height - 15))
-
-    def update(self):
-        if pygame.sprite.spritecollideany(self, cell_group):
-            self.rect = self.rect.move(self.vx, self.vy)
-            #print('клетка')
-        if pygame.sprite.spritecollideany(self, box_group):
-            self.rect = self.rect.move(- self.vx, self.vy)
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
@@ -133,372 +57,1091 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
-def load_level(filename):
-    filename = my_menu.filename
-    with open(filename, 'r') as mapFile:
-        level_map = [line.strip() for line in mapFile]
-    max_width = max(map(len, level_map))
-    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+class Menu:
+    def __init__(self):
+        self.main_background = load_image('shogun-showdown.jpg')
+        self.main_background2 = load_image('main_background2.jpg')
+        self.main_background3 = load_image('main_background3.jpg')
+        self.level_passed = load_image('level_passed.jpg')
+        self.clock = pygame.time.Clock()
+        self.cursor = load_image('cursor.png')
+        pygame.mouse.set_visible(False)
+        self.player_level1 = 5
+        self.enemy_level1 = 4
+        self.index_p = 4
+        self.index_e = 9
+        self.sprite = pygame.sprite.Sprite()
+        self.bg = load_image('bg.png')
+        self.sprite.image = load_image("Attack1.png")
+        self.sprite.image = load_image("Attack2.png")
 
-def generate_level(level):
-    new_player, x, y = None, None, None
-    new_skel, x, y = None, None, None
-    new_string, x, y = None, None, None
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Cell('white_string', x, y)
-            elif level[y][x] == '@':
-                new_player = Player(x, y)
-                new_string = Cell('white_string', x, y)
-            elif level[y][x] == 's':
-                new_skel = Enemy(x, y)
-                new_string = Cell('white_string', x, y)
-            elif level[y][x] == 'd':
-                new_skel = Enemy(x, y)
-                new_string = Cell('white_string', x, y)
+        self.hero_image = load_image("Attack1.png")
+        self.hero_image2 = load_image("Attack2.png")
+        self.enemy_image = load_image("Runattack.png")
+
+        self.all_sprites = pygame.sprite.Group()
+        self.tiles_group = pygame.sprite.Group()
+        self.player_group = pygame.sprite.Group()
+        self.box_group = pygame.sprite.Group()
+        self.enemy_group = pygame.sprite.Group()
+        self.cell_group = pygame.sprite.Group()
+        self.all_sprites = pygame.sprite.Group()
+        pygame.mixer.music.load('menu_music.mp3')
+        pygame.mixer.music.play(-1)
+        self.defi = False
+
+    def main_menu(self):
+        start_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Новая игра", "knop2.jpg", "knop.jpg",
+                                   "click.mp3")
+        settigs_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Настройки", "knop2.jpg", "knop.jpg",
+                                     "click.mp3")
+        exit_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Выйти", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Shogun Showdown', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(460, 50))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == start_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == settigs_button:
+                    self.fade()
+                    self.settigs_menu()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == exit_button:
+                    pygame.quit()
+                    sys.exit()
+
+                for btn in [start_button, settigs_button, exit_button]:
+                    btn.handle_event(event)
+
+            for btn in [start_button, settigs_button, exit_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def settigs_menu(self):
+        audio_button = ImageButton(WIDTH / 2 - (252 / 2), 150, 252, 74, "Звук", "knop2.jpg", "knop.jpg", "click.mp3")
+        pravila_button = ImageButton(WIDTH / 2 - (252 / 2), 250, 252, 74, "Правила игры", "knop2.jpg", "knop.jpg",
+                                     "click.mp3")
+        infa_enemy_button = ImageButton(WIDTH / 2 - (252 / 2), 350, 252, 74, "Враги", "knop2.jpg", "knop.jpg",
+                                        "click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, -200))
+
+            font = pygame.font.Font(None, 72)  # размер текста
+            text_surface = font.render('Настройки', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(460, 50))
+            screen.blit(text_surface, text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == pravila_button:
+                    self.fade()
+                    self.pravil_game()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.main_menu()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == infa_enemy_button:
+                    self.fade()
+                    self.enemy()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == audio_button:
+                    self.fade()
+                    self.music_fon()
+                    running = False
+
+                for btn in [audio_button, pravila_button, back_button, infa_enemy_button]:
+                    btn.handle_event(event)
+
+            for btn in [audio_button, pravila_button, back_button, infa_enemy_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def pravil_game(self):
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, -200))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Правила игры', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('Цель игры: победить противника', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(300, 100))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('Управление игроком:', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(300, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('"a" - передвижение игрока на одну платформу влево', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(445, 175))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('"d" - передвижение игрока на одну платформу вправо', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(455, 200))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('"q" - атака, которая сносит минимальное количество здоровья', True,
+                                       (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(510, 225))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('"e" - атака, которая сносит максимальное', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(360, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('количество здоровья', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(700, 275))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('"w" - разворот героя', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(210, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('"f" - пропуск хода', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(200, 325))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('Каждый герой имеет свои характеристики,', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(350, 400))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 42)
+            text_surface = font.render('с которомы можно ознакомиться при выборе героя', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(400, 450))
+            screen.blit(text_surface, text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    running = False
+
+                for btn in [back_button]:
+                    btn.handle_event(event)
+
+            for btn in [back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def hero_change(self):
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle2.png", "Idle2.png", "click.mp3")
+        hero2_button = ImageButton(350, 150, 252, 252, "", "Idle.png", "Idle.png", "click.mp3")
+        hero3_button = ImageButton(600, 150, 252, 252, "", "Idle3.png", "Idle3.png", "click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (-300, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Выбери персонажа', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == hero1_button:
+                    self.fade()
+                    self.menu_hero1()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == hero2_button:
+                    self.fade()
+                    self.menu_hero2()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == hero3_button:
+                    self.fade()
+                    self.menu_hero3()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.main_menu()
+                    running = False
+
+                for btn in [hero1_button, hero2_button, hero3_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [hero1_button, hero2_button, hero3_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_hero1(self):
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle2.png", "Idle2.png", "click.mp3")
+        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "click.mp3")
+        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Выбери персонажа', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 70)
+            text_surface = font.render('Рыцарь', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Ближний бой', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Очки здоровья : 15', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Слабая атака: урон 1 хп', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 350))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Сильная атака: урон 2 хп', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 400))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == choice_button:
+                    self.fade()
+                    all_sprites = pygame.sprite.Group()
+                    self.hit_1 = 1
+                    self.hit_2 = 2
+                    self.health_player = 12
+                    self.player_image = load_image('Idle2.png')
+                    self.player_hero_turn = 111
+                    self.player_hero = 'hero1'
+                    self.sprite.image = load_image("Attack1_hero1.png")
+                    self.sprite.image = load_image("Attack2_hero1.png")
+                    self.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
+                    self.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
+                    self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+                    self.new_game()
+                    running = False
+
+                for btn in [hero1_button, choice_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [hero1_button, choice_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_hero2(self):
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle.png", "Idle.png", "click.mp3")
+        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "click.mp3")
+        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Выбери персонажа', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 70)
+            text_surface = font.render('Магический рыцарь', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Дальний бой', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Очки здоровья : 8', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Слабая атака: урон 0.8 хп', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 350))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Сильная атака: урон 1.8 хп', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 400))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == choice_button:
+                    self.fade()
+                    all_sprites = pygame.sprite.Group()
+                    self.health_player = 8
+                    self.hit_1 = 0.8
+                    self.hit_2 = 1.8
+                    self.player_image = load_image('Idle.png')
+                    self.player_hero_turn = 222
+                    self.player_hero = 'hero2'
+                    #self.player_image2 = load_image('Idle32.png')
+                    self.sprite.image = load_image("Attack1_hero2.png")
+                    self.sprite.image = load_image("Attack2_hero2.png")
+                    self.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
+                    self.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
+                    self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+                    self.new_game()
+                    running = False
+
+                for btn in [hero1_button, choice_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [hero1_button, choice_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_hero3(self):
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle3.png", "Idle3.png", "click.mp3")
+        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "click.mp3")
+        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Выбери персонажа', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 70)
+            text_surface = font.render('Маг', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Дальний бой', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Очки здоровья : 5', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Слабая атака: урон 1 хп', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 350))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Сильная атака: урон 2 хп', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 400))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == choice_button:
+                    self.fade()
+                    all_sprites = pygame.sprite.Group()
+                    self.health_player = 5
+                    self.hit_1 = 1
+                    self.hit_2 = 2
+                    self.player_image = load_image('Idle3.png')
+                    self.player_hero_turn = 333
+                    self.player_hero = 'hero3'
+                    self.player_image2 = load_image('Idle32.png')
+                    self.sprite.image = load_image("Attack1.png")
+                    self.sprite.image = load_image("Attack2.png")
+                    self.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
+                    self.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
+                    self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+                    self.new_game()
+                    running = False
+
+                for btn in [hero1_button, choice_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [hero1_button, choice_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def music_fon(self):
+        off_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Включить", "knop2.jpg", "knop.jpg", "click.mp3")
+        on_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Выключить", "knop2.jpg", "knop.jpg", "click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, -200))
+            music_paused = False
+
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Звук', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(460, 50))
+            screen.blit(text_surface, text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == on_button:
+                    music_paused = not music_paused
+                    if music_paused:
+                        pygame.mixer.music.pause()
+
+                if event.type == pygame.USEREVENT and event.button == off_button:
+                    pygame.mixer.music.unpause()
+
+                for btn in [off_button, on_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [off_button, on_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def new_game(self):
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        start_new_game = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Играть", "knop2.jpg", "knop.jpg",
+                                     "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, 0))
+            font = pygame.font.Font(None, 72)  # размер текста
+            text_surface = font.render('Добро пожаловать в игру!', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(400, 50))
+            screen.blit(text_surface, text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == start_new_game:
+                    self.fade()
+                    self.play()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                for btn in [start_new_game, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [start_new_game, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def enemy(self):
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy1.png", "Idle_enemy1.png", "click.mp3")
+        enemy2_button = ImageButton(330, 150, 252, 252, "", "goblin1.png", "goblin1.png", "click.mp3")
+        enemy3_button = ImageButton(600, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (-300, 0))
+            font = pygame.font.Font(None, 52)
+            text_surface = font.render('Выбери врага, о котором хочешь узнать инфрмацию', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(490, 50))
+            screen.blit(text_surface, text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == enemy1_button:
+                    self.fade()
+                    self.menu_enemy1()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == enemy2_button:
+                    self.fade()
+                    self.menu_enemy2()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == enemy3_button:
+                    self.fade()
+                    self.menu_enemy3()
+                    running = False
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.settigs_menu()
+                    running = False
+
+                for btn in [enemy1_button, enemy2_button, enemy3_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [enemy1_button, enemy2_button, enemy3_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_enemy1(self):
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy1.png", "Idle_enemy1.png", "click.mp3")
+        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Информация о враге', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 70)
+            text_surface = font.render('Скелет', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Ближний бой', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Очки здоровья : 5', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Атака: урон 1 хп', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 350))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Передвижение: 1 шаг - 1 клетка', True, (249, 183, 225))
+            text_rect = text_surface.get_rect(center=(600, 400))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.enemy()
+                    running = False
+
+                for btn in [enemy1_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [enemy1_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_enemy2(self):
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "goblin1.png", "goblin1.png", "click.mp3")
+        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Информация о враге', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 70)
+            text_surface = font.render('Гоблин', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Ближний бой', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Очки здоровья : 6', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Атака: урон 2 хп', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 350))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Передвижение: 1 шаг - 1 клетка', True, (153, 156, 226))
+            text_rect = text_surface.get_rect(center=(600, 400))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.enemy()
+                    running = False
+
+                for btn in [enemy1_button, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [enemy1_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_enemy3(self):
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "click.mp3")
+        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background2, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Информация о враге', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 70)
+            text_surface = font.render('Гоблин', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 150))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Ближний бой', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 250))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Очки здоровья : 7', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 300))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Атака: урон 2 хп', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 350))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 40)
+            text_surface = font.render('Передвижение: 1 шаг - 1 клетка', True, (156, 226, 153))
+            text_rect = text_surface.get_rect(center=(600, 400))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.enemy()
+                    running = False
 
 
-    return new_skel, new_player, x, y
+                for btn in [enemy1_button, back_button]:
+                    btn.handle_event(event)
 
-skel, player, level_x, level_y = generate_level(load_level('play.txt'))
+            for btn in [enemy1_button, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
 
-run = False
-all_sprites = pygame.sprite.Group()
-sprite = pygame.sprite.Sprite()
-#sprite.rect = sprite.image.get_rect()
-count = 0
-last = None
-in_mission = False
-music_paused = False
-running = True
-pygame.mixer.music.load('level_music.mp3')
-pygame.mixer.music.play(-1)
-turn = 'right'
-while running:
-    screen.fill((255, 255, 255))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_q:
-                count = 1
-                for _ in range(8):
-                    screen.blit(my_menu.bg, (0, 0))
-                    count = 1
-                    if my_menu.player_hero == 'hero1':
-                        if my_menu.index_p - my_menu.index_e == 1:
-                            if turn == 'left':
-                                print(turn)
-                                my_menu.hero.update()
-                                atack_hero3.play()
-                                all_sprites.draw(screen)
-                                pygame.display.flip()
-                                clock.tick(FPS)
-                                my_menu.health_enemy -= my_menu.hit_1
-                                print('урон врагу -1')
-                                if my_menu.health_enemy <= 0:
-                                    print('победа')
-                                    my_menu.menu_level()
-                                    running = False
-                            break
-                        if my_menu.index_e - my_menu.index_p == 1:
-                            if turn == 'right':
-                                print(turn)
-                                my_menu.hero.update()
-                                atack_hero3.play()
-                                all_sprites.draw(screen)
-                                pygame.display.flip()
-                                clock.tick(FPS)
-                                my_menu.health_enemy -= my_menu.hit_1
-                                print('урон врагу -1')
-                                if my_menu.health_enemy <= 0:
-                                    print('победа')
-                                    my_menu.menu_level()
-                                    running = False
-                            break
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
 
-                    if my_menu.player_hero == 'hero2' or my_menu.player_hero == 'hero3':
-                        if my_menu.index_p - my_menu.index_e > 1:
-                            if turn == 'left':
-                                my_menu.hero.update()
-                                atack_hero.play()
-                                all_sprites.draw(screen)
-                                pygame.display.flip()
-                                clock.tick(FPS)
-                                my_menu.health_enemy -= my_menu.hit_1
-                                print('урон врагу -1')
-                                if my_menu.health_enemy <= 0:
-                                    print('победа')
-                                    running = False
-                                break
-                        if my_menu.index_e - my_menu.index_p > 1:
-                            if turn == 'right':
-                                my_menu.hero.update()
-                                atack_hero.play()
-                                all_sprites.draw(screen)
-                                pygame.display.flip()
-                                clock.tick(FPS)
-                                my_menu.health_enemy -= my_menu.hit_1
-                                print('урон врагу -1')
-                                if my_menu.health_enemy <= 0:
-                                    print('победа')
-                                    running = False
-                                break
+    def play(self):
+        level1 = ImageButton(220, 250, 74, 74, "1", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
+        level2 = ImageButton(320, 250, 74, 74, "2", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
+        level3 = ImageButton(420, 250, 74, 74, "3", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
+        level4 = ImageButton(520, 250, 74, 74, "4", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
+        level5 = ImageButton(620, 250, 74, 74, "5", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
+        back_button = ImageButton(700, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Выбери уровень', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(400, 50))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
 
-                run = True
-                if my_menu.index_p - my_menu.index_e == 1 or my_menu.index_e - my_menu.index_p == 1:
-                    my_menu.health_player -= my_menu.hit_enemy
-                    screen.blit(my_menu.bg, (0, 0))
-                    my_menu.enemy.update()
-                    atack_enemy.play()
-                    all_sprites.draw(screen)
-                    pygame.display.flip()
-                    clock.tick(FPS)
-                    print('урон игроку')
-                    if my_menu.health_player <= 0:
-                        print('поражение')
-                        my_menu.defeat()
-                        #running = False
-                    run = False
-                if run:
-                    if my_menu.index_p > my_menu.index_e:
-                        my_menu.index_e += 1
-                        skel.vx = STEP
-                        enemy_group.update()
-                    if my_menu.index_p < my_menu.index_e:
-                        my_menu.index_e -= 1
-                        skel.vx = -STEP
-                        enemy_group.update()
-                    run = False
+                if event.type == pygame.USEREVENT and event.button == level1:
+                    self.fade()
+                    self.level_111 = 1
+                    self.index_p = 4
+                    self.index_e = 9
+                    self.health_enemy = 5
+                    self.filename = 'test_map'
+                    self.bg = load_image('bg.png')
+                    self.hit_enemy = 1
+                    self.skel_image = load_image('Idle_enemy.png')
+                    self.level_game_play = 'one'
+                    print('l1')
+                    running = False
 
-            if event.key == pygame.K_e:
-                if count == 1:
-                    for _ in range(8):
-                        if my_menu.player_hero == 'hero1':
-                            if my_menu.index_p - my_menu.index_e == 1:
-                                if turn == 'left':
-                                    my_menu.hero.update()
-                                    atack_hero4.play()
-                                    all_sprites.draw(screen)
-                                    pygame.display.flip()
-                                    clock.tick(FPS)
-                                    my_menu.health_enemy -= my_menu.hit_2
-                                    print('урон врагу -2')
-                                    if my_menu.health_enemy <= 0:
-                                        print('победа')
-                                        my_menu.menu_level()
-                                        running = False
-                                break
-                            if my_menu.index_e - my_menu.index_p == 1:
-                                if turn == 'right':
-                                    my_menu.hero.update()
-                                    atack_hero4.play()
-                                    all_sprites.draw(screen)
-                                    pygame.display.flip()
-                                    clock.tick(FPS)
-                                    my_menu.health_enemy -= my_menu.hit_2
-                                    print('урон врагу -2')
-                                    if my_menu.health_enemy <= 0:
-                                        print('победа')
-                                        my_menu.menu_level()
-                                        running = False
-                                break
-                        if my_menu.player_hero == 'hero2' or my_menu.player_hero == 'hero3':
-                            if my_menu.index_p - my_menu.index_e > 1:
-                                if turn == 'left':
-                                    my_menu.hero.update()
-                                    atack_hero2.play()
-                                    all_sprites.draw(screen)
-                                    pygame.display.flip()
-                                    clock.tick(FPS)
-                                    my_menu.health_enemy -= my_menu.hit_1
-                                    print('урон врагу -1')
-                                    if my_menu.health_enemy <= 0:
-                                        my_menu.menu_level()
-                                        print('победа')
-                                        running = False
-                                    break
-                            if my_menu.index_e - my_menu.index_p > 1:
-                                if turn == 'right':
-                                    my_menu.hero.update()
-                                    atack_hero.play()
-                                    all_sprites.draw(screen)
-                                    pygame.display.flip()
-                                    clock.tick(FPS)
-                                    my_menu.health_enemy -= my_menu.hit_1
-                                    print('урон врагу -1')
-                                    if my_menu.health_enemy <= 0:
-                                        print('победа')
-                                        running = False
-                                    break
+                if event.type == pygame.USEREVENT and event.button == level2:
+                    self.fade()
+                    self.level_222 = 2
+                    self.index_p = 2
+                    self.index_e = 4
+                    self.health_enemy = 6
+                    self.filename = 'test_map1'
+                    self.bg = load_image('bg.png')
+                    self.hit_enemy = 1
+                    self.skel_image = load_image('Idle_enemy.png')
+                    self.level_game_play = 'two'
+                    print('l2')
+                    running = False
 
-                        run = True
-                    if my_menu.index_p - my_menu.index_e == 1 or my_menu.index_e - my_menu.index_p == 1:
-                        my_menu.health_player -= my_menu.hit_enemy
-                        screen.blit(my_menu.bg, (0, 0))
-                        my_menu.enemy.update()
-                        atack_enemy.play()
-                        all_sprites.draw(screen)
-                        pygame.display.flip()
-                        clock.tick(FPS)
-                        print('урон игроку')
-                        if my_menu.health_player <= 0:
-                            print('поражение')
-                            my_menu.defeat()
-                            #running = False
-                        run = False
-                    if run:
-                        if my_menu.index_p > my_menu.index_e:
-                            my_menu.index_e += 1
-                            skel.vx = STEP
-                            enemy_group.update()
-                        if my_menu.index_p < my_menu.index_e:
-                            my_menu.index_e -= 1
-                            skel.vx = -STEP
-                            enemy_group.update()
-                        run = False
+                if event.type == pygame.USEREVENT and event.button == level3:
+                    self.fade()
+                    self.level_222 = 2
+                    self.index_p = 2
+                    self.index_e = 4
+                    self.health_enemy = 6
+                    self.filename = 'test_map1'
+                    self.bg = load_image('bg.png')
+                    self.hit_enemy = 2
+                    self.skel_image = load_image('goblin1.png')
+                    self.level_game_play = 'three'
+                    print('l3')
+                    running = False
 
-            if 1 < my_menu.index_p <= 10 and my_menu.index_p - my_menu.index_e != 1:
-                if event.key == pygame.K_a:
-                    my_menu.index_p -= 1
-                    player.vx = -STEP
-                    player_group.update()
-                    run = True
-                    if my_menu.index_p - my_menu.index_e == 1 or my_menu.index_e - my_menu.index_p == 1:
-                        my_menu.health_player -= 1
-                        screen.blit(my_menu.bg, (0, 0))
-                        my_menu.enemy.update()
-                        atack_enemy.play()
-                        all_sprites.draw(screen)
-                        pygame.display.flip()
-                        clock.tick(FPS)
-                        print('урон игроку')
-                        if my_menu.health_player <= 0:
-                            print('поражение')
-                            my_menu.defeat()
-                            #running = False
-                        run = False
-                    if run:
-                        if my_menu.index_p > my_menu.index_e:
-                            my_menu.index_e += 1
-                            skel.vx = STEP
-                            enemy_group.update()
-                        if my_menu.index_p < my_menu.index_e:
-                            my_menu.index_e -= 1
-                            skel.vx = -STEP
-                            enemy_group.update()
-                        run = False
+                if event.type == pygame.USEREVENT and event.button == level4:
+                    self.fade()
+                    self.level_222 = 2
+                    self.index_p = 7
+                    self.index_e = 4
+                    self.health_enemy = 6
+                    self.filename = 'test_map2'
+                    self.bg = load_image('bg.png')
+                    self.hit_enemy = 2
+                    self.skel_image = load_image('goblin.png')
+                    self.level_game_play = 'four'
+                    running = False
 
-            if 1 <= my_menu.index_p < 10 and my_menu.index_e - my_menu.index_p != 1:
-                if event.key == pygame.K_d:
-                    my_menu.index_p += 1
-                    player.vx = STEP
-                    player_group.update()
-                    run = True
-                    if my_menu.index_p - my_menu.index_e == 1 or my_menu.index_e - my_menu.index_p == 1:
-                        my_menu.health_player -= 1
-                        screen.blit(my_menu.bg, (0, 0))
-                        my_menu.enemy.update()
-                        atack_enemy.play()
-                        all_sprites.draw(screen)
-                        pygame.display.flip()
-                        clock.tick(FPS)
-                        print('урон игроку')
-                        if my_menu.health_player <= 0:
-                            print('поражение')
-                            my_menu.defeat()
-                            running = False
-                        run = False
-                    if run:
-                        if my_menu.index_p > my_menu.index_e:
-                            my_menu.index_e += 1
-                            skel.vx = STEP
-                            enemy_group.update()
-                        if my_menu.index_p < my_menu.index_e:
-                            my_menu.index_e -= 1
-                            skel.vx = -STEP
-                            enemy_group.update()
-                        run = False
+                if event.type == pygame.USEREVENT and event.button == level5:
+                    self.fade()
+                    self.level_222 = 2
+                    self.index_p = 7
+                    self.index_e = 4
+                    self.health_enemy = 6.5
+                    self.filename = 'test_map2'
+                    self.bg = load_image('bg.png')
+                    self.hit_enemy = 2
+                    self.skel_image = load_image('Idle_skel_plus1.png')
+                    self.level_game_play = 'five'
+                    running = False
 
-            if event.key == pygame.K_w:
-                if my_menu.player_hero_turn == 111:
-                    player_image = load_image('Idle22.png')
-                    player.change_skin(player_image)
-                    turn = 'left'
-                if my_menu.player_hero_turn == 222:
-                    player_image = load_image('Idle0.png')
-                    player.change_skin(player_image)
-                    turn = 'left'
-                if my_menu.player_hero_turn == 333:
-                    player_image = load_image('Idle32.png')
-                    player.change_skin(player_image)
-                    turn = 'left'
-                run = True
-                if my_menu.index_p - my_menu.index_e == 1 or my_menu.index_e - my_menu.index_p == 1:
-                    my_menu.health_player -= my_menu.hit_enemy
-                    screen.blit(my_menu.bg, (0, 0))
-                    my_menu.enemy.update()
-                    atack_enemy.play()
-                    all_sprites.draw(screen)
-                    pygame.display.flip()
-                    clock.tick(FPS)
-                    print('урон игроку')
-                    if my_menu.health_player <= 0:
-                        print('поражение')
-                        my_menu.defeat()
-                    run = False
-                if run:
-                    if my_menu.index_p > my_menu.index_e:
-                        my_menu.index_e += 1
-                        skel.vx = STEP
-                        enemy_group.update()
-                    if my_menu.index_p < my_menu.index_e:
-                        my_menu.index_e -= 1
-                        skel.vx = -STEP
-                        enemy_group.update()
-                    run = False
+                if event.type == pygame.USEREVENT and event.button == back_button:
+                    self.fade()
+                    self.new_game()
+                    running = False
 
-            if event.key == pygame.K_f:
-                print('пропуск хода')
-                run = True
-                if my_menu.index_p - my_menu.index_e == 1 or my_menu.index_e - my_menu.index_p == 1:
-                    my_menu.health_player -= my_menu.hit_enemy
-                    screen.blit(my_menu.bg, (0, 0))
-                    my_menu.enemy.update()
-                    atack_enemy.play()
-                    all_sprites.draw(screen)
-                    pygame.display.flip()
-                    clock.tick(FPS)
-                    print('урон игроку')
-                    if my_menu.health_player <= 0:
-                        print('поражение')
-                        my_menu.defeat()
+                for btn in [level1, level2, level3, level4, level5, back_button]:
+                    btn.handle_event(event)
+
+            for btn in [level1, level2, level3, level4, level5, back_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def menu_level(self):
+        next_level_button = ImageButton(600, 300, 74, 74, "", "next_level.jpg", "next_leve_lightl.jpg", "click.mp3")
+        previos_level_button = ImageButton(300, 300, 74, 74, "", "previos_level_button.jpg",
+                                           "previos_level_button_light.jpg", "click.mp3")
+        all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "click.mp3")
+        menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "click.mp3")
+        victory_music.play()
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(level_passed, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Уровень пройден!', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 55))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == next_level_button:
+                    running = False
+                    self.fade()
+                    self.next_level_button = True
+
+                if event.type == pygame.USEREVENT and event.button == previos_level_button:
+                    running = False
+                    self.fade()
+
+                if event.type == pygame.USEREVENT and event.button == all_level_button:
+                    running = False
+                    self.fade()
+
+                if event.type == pygame.USEREVENT and event.button == menu_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                for btn in [next_level_button, previos_level_button, all_level_button, menu_button]:
+                    btn.handle_event(event)
+
+            for btn in [next_level_button, previos_level_button, all_level_button, menu_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def defeat(self):
+        all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "click.mp3")
+        menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "click.mp3")
+        loss_music.play()
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background3, (-300, -200))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Поражение. Тебя убили', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 50))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == all_level_button:
+                    self.fade()
+                    if self.player_hero == 'hero1':
+                        all_sprites = pygame.sprite.Group()
+                        self.hit_1 = 1
+                        self.hit_2 = 2
+                        self.health_player = 12
+                        self.player_image = load_image('Idle2.png')
+                        self.player_hero_turn = 111
+                        self.player_hero = 'hero1'
+                        self.sprite.image = load_image("Attack1_hero1.png")
+                        self.sprite.image = load_image("Attack2_hero1.png")
+                        self.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
+                        self.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
+                        self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+
+                    if self.player_hero == 'hero2':
+                        self.fade()
+                        all_sprites = pygame.sprite.Group()
+                        self.health_player = 8
+                        self.hit_1 = 0.8
+                        self.hit_2 = 1.8
+                        self.player_image = load_image('Idle.png')
+                        self.player_hero_turn = 222
+                        self.sprite.image = load_image("Attack1_hero2.png")
+                        self.sprite.image = load_image("Attack2_hero2.png")
+                        self.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
+                        self.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
+                        self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+
+                    if self.player_hero == 'hero3':
+                        self.fade()
+                        all_sprites = pygame.sprite.Group()
+                        self.health_player = 5
+                        self.hit_1 = 1
+                        self.hit_2 = 2
+                        self.player_image = load_image('Idle3.png')
+                        self.player_hero_turn = 333
+                        self.player_image2 = load_image('Idle32.png')
+                        self.sprite.image = load_image("Attack1.png")
+                        self.sprite.image = load_image("Attack2.png")
+                        self.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
+                        self.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
+                        self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+
+                    if self.level_game_play == 'one':
+                        self.fade()
+                        self.continue_level = 'one'
+                        self.level_111 = 1
+                        self.index_p = 4
+                        self.index_e = 9
+                        self.health_enemy = 5
+                        self.filename = 'test_map'
+                        self.bg = load_image('bg.png')
+                        self.hit_enemy = 1
+                        self.skel_image = load_image('Idle_enemy.png')
+                        self.level_game_play = 'one'
                         running = False
-                    run = False
-                if run:
-                    if my_menu.index_p > my_menu.index_e:
-                        my_menu.index_e += 1
-                        skel.vx = STEP
-                        enemy_group.update()
-                    if my_menu.index_p < my_menu.index_e:
-                        my_menu.index_e -= 1
-                        skel.vx = -STEP
-                        enemy_group.update()
-                    run = False
 
-                if event.key == pygame.K_UP:
-                    pass
-                if event.key == pygame.K_DOWN:
-                    pass
+                    if self.level_game_play == 'two':
+                        self.fade()
+                        self.level_222 = 2
+                        self.index_p = 2
+                        self.index_e = 4
+                        self.health_enemy = 6
+                        self.filename = 'test_map1'
+                        self.bg = load_image('bg.png')
+                        self.hit_enemy = 1
+                        self.skel_image = load_image('Idle_enemy.png')
+                        self.level_game_play = 'two'
+                        running = False
 
-    all_sprites.draw(screen)
-    screen.blit(my_menu.bg, (0, 0))
-    cell_group.draw(screen)
-    tiles_group.draw(screen)
-    player_group.draw(screen)
-    enemy_group.draw(screen)
-    pygame.display.flip()
-    clock.tick(FPS)
-    clock.tick(FPS1)
-terminate()
+                    if self.level_game_play == 'three':
+                        self.fade()
+                        self.level_222 = 2
+                        self.index_p = 2
+                        self.index_e = 4
+                        self.health_enemy = 6
+                        self.filename = 'test_map1'
+                        self.bg = load_image('bg.png')
+                        self.hit_enemy = 2
+                        self.skel_image = load_image('goblin1.png')
+                        self.level_game_play = 'three'
+                        running = False
+
+                if event.type == pygame.USEREVENT and event.button == menu_button:
+                    self.fade()
+                    self.hero_change()
+                    running = False
+
+                for btn in [all_level_button, menu_button]:
+                    btn.handle_event(event)
+
+            for btn in [all_level_button, menu_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def fade(self):
+        running = True
+        fade_alpha = 0
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            fade_surface = pygame.Surface((WIDTH, HEIGHT))
+            fade_surface.fill((0, 0, 0))
+            fade_surface.set_alpha(fade_alpha)
+            screen.blit(fade_surface, (0, 0))
+
+            fade_alpha += 5
+            if fade_alpha >= 100:
+                fade_alpha = 255
+                running = False
+
+            pygame.display.flip()
+            clock.tick(MAX_FPS)
+
