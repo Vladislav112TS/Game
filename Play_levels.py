@@ -30,7 +30,7 @@ enemy_group = pygame.sprite.Group()
 cell_group = pygame.sprite.Group()
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join(name)
+    fullname = os.path.join('image', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -259,7 +259,7 @@ while running:
                     if my_menu.health_player <= 0:
                         print('поражение')
                         my_menu.defeat()
-                        running = False
+                        #running = False
                     run = False
                 if run:
                     if my_menu.index_p > my_menu.index_e:
@@ -344,12 +344,9 @@ while running:
                         clock.tick(FPS)
                         print('урон игроку')
                         if my_menu.health_player <= 0:
-                            #music_paused = not music_paused
-                            #if music_paused:
-                             #   pygame.mixer.music.pause()
                             print('поражение')
                             my_menu.defeat()
-                            running = False
+                            #running = False
                         run = False
                     if run:
                         if my_menu.index_p > my_menu.index_e:
@@ -379,11 +376,8 @@ while running:
                         print('урон игроку')
                         if my_menu.health_player <= 0:
                             print('поражение')
-                            music_paused = not music_paused
-                            #if music_paused:
-                               # pygame.mixer.music.pause()
-                            #my_menu.defeat()
-                            running = False
+                            my_menu.defeat()
+                            #running = False
                         run = False
                     if run:
                         if my_menu.index_p > my_menu.index_e:
@@ -413,9 +407,6 @@ while running:
                         print('урон игроку')
                         if my_menu.health_player <= 0:
                             print('поражение')
-                            #music_paused = not music_paused
-                            #if music_paused:
-                              #  pygame.mixer.music.pause()
                             my_menu.defeat()
                             running = False
                         run = False
@@ -455,9 +446,7 @@ while running:
                     print('урон игроку')
                     if my_menu.health_player <= 0:
                         print('поражение')
-                        music_paused = not music_paused
-                        if my_menu.defi == True:
-                            running = True
+                        my_menu.defeat()
                     run = False
                 if run:
                     if my_menu.index_p > my_menu.index_e:
@@ -484,10 +473,8 @@ while running:
                     print('урон игроку')
                     if my_menu.health_player <= 0:
                         print('поражение')
-                        music_paused = not music_paused
+                        my_menu.defeat()
                         running = False
-                        if my_menu.defi == True:
-                            running = True
                     run = False
                 if run:
                     if my_menu.index_p > my_menu.index_e:
