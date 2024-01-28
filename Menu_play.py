@@ -1,4 +1,4 @@
-import pygame
+mport pygame
 import sys
 from Button_effects import ImageButton
 import os
@@ -34,7 +34,6 @@ victory_music = pygame.mixer.Sound('db344f8d1a8d5b5.ogg')
 loss_music = pygame.mixer.Sound('z_uki-mech-_-telo.ogg')
 all_sprites = pygame.sprite.Group()
 
-
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__(all_sprites)
@@ -57,6 +56,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
+
 class Menu:
     def __init__(self):
         self.main_background = load_image('shogun-showdown.jpg')
@@ -64,21 +64,11 @@ class Menu:
         self.main_background3 = load_image('main_background3.jpg')
         self.level_passed = load_image('level_passed.jpg')
         self.clock = pygame.time.Clock()
+        self.win = "None"
+        self.lose = "None"
         self.cursor = load_image('cursor.png')
         pygame.mouse.set_visible(False)
-        self.player_level1 = 5
-        self.enemy_level1 = 4
-        self.index_p = 4
-        self.index_e = 9
         self.sprite = pygame.sprite.Sprite()
-        self.bg = load_image('bg.png')
-        self.sprite.image = load_image("Attack1.png")
-        self.sprite.image = load_image("Attack2.png")
-
-        self.hero_image = load_image("Attack1.png")
-        self.hero_image2 = load_image("Attack2.png")
-        self.enemy_image = load_image("Runattack.png")
-
         self.all_sprites = pygame.sprite.Group()
         self.tiles_group = pygame.sprite.Group()
         self.player_group = pygame.sprite.Group()
@@ -86,6 +76,8 @@ class Menu:
         self.enemy_group = pygame.sprite.Group()
         self.cell_group = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group()
+        self.w_press = True
+        self.num = 1
         pygame.mixer.music.load('menu_music.mp3')
         pygame.mixer.music.play(-1)
         self.defi = False
@@ -127,6 +119,45 @@ class Menu:
                     btn.handle_event(event)
 
             for btn in [start_button, settigs_button, exit_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+
+    def no_go_level(self):
+        menu_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 300, 74, "Вернуться в меню", "knop2.jpg", "knop.jpg",
+                                   "click.mp3")
+
+        running = True
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(main_background, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Вы не можете пройти этот уровень,', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(460, 60))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('так как не прошли предыдущий.', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 110))
+            screen.blit(text_surface, text_rect)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == menu_button:
+                    self.fade()
+                    self.play()
+                    running = False
+
+
+                for btn in [menu_button ]:
+                    btn.handle_event(event)
+
+            for btn in [menu_button ]:
                 btn.check_cursor(pygame.mouse.get_pos())
                 btn.draw(screen)
 
@@ -261,13 +292,14 @@ class Menu:
 
                 if event.type == pygame.USEREVENT and event.button == back_button:
                     self.fade()
+                    self.settigs_menu()
                     running = False
 
                 for btn in [back_button]:
                     btn.handle_event(event)
 
             for btn in [back_button]:
-                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.check_cursor(pygame.mouse.get_pos())
                 btn.draw(screen)
 
             x, y = pygame.mouse.get_pos()
@@ -378,6 +410,7 @@ class Menu:
                     self.health_player = 12
                     self.player_image = load_image('Idle2.png')
                     self.player_hero_turn = 111
+                    self.player_hero_start = 1111
                     self.player_hero = 'hero1'
                     self.sprite.image = load_image("Attack1_hero1.png")
                     self.sprite.image = load_image("Attack2_hero1.png")
@@ -448,11 +481,12 @@ class Menu:
                 if event.type == pygame.USEREVENT and event.button == choice_button:
                     self.fade()
                     all_sprites = pygame.sprite.Group()
-                    self.health_player = 8
+                    self.health_player = 7
                     self.hit_1 = 0.8
                     self.hit_2 = 1.8
                     self.player_image = load_image('Idle.png')
                     self.player_hero_turn = 222
+                    self.player_hero_start = 2222
                     self.player_hero = 'hero2'
                     #self.player_image2 = load_image('Idle32.png')
                     self.sprite.image = load_image("Attack1_hero2.png")
@@ -524,11 +558,12 @@ class Menu:
                 if event.type == pygame.USEREVENT and event.button == choice_button:
                     self.fade()
                     all_sprites = pygame.sprite.Group()
-                    self.health_player = 5
+                    self.health_player = 4
                     self.hit_1 = 1
                     self.hit_2 = 2
                     self.player_image = load_image('Idle3.png')
                     self.player_hero_turn = 333
+                    self.player_hero_start = 3333
                     self.player_hero = 'hero3'
                     self.player_image2 = load_image('Idle32.png')
                     self.sprite.image = load_image("Attack1.png")
@@ -633,7 +668,7 @@ class Menu:
             pygame.display.flip()
 
     def enemy(self):
-        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy1.png", "Idle_enemy1.png", "click.mp3")
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy.png", "Idle_enemy.png", "click.mp3")
         enemy2_button = ImageButton(330, 150, 252, 252, "", "goblin1.png", "goblin1.png", "click.mp3")
         enemy3_button = ImageButton(600, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "click.mp3")
         back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
@@ -854,6 +889,16 @@ class Menu:
             screen.blit(cursor, (x, y))
             pygame.display.flip()
 
+    def levels_choice(self, index_p, index_e, health_enemy, filename, bg, hit_enemy, skel_image):
+        self.index_p = index_p
+        self.index_e = index_e
+        self.health_enemy = health_enemy
+        self.filename = filename
+        print(filename)
+        self.bg = load_image(bg)
+        self.hit_enemy = hit_enemy
+        self.skel_image = load_image(skel_image)
+
     def play(self):
         level1 = ImageButton(220, 250, 74, 74, "1", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
         level2 = ImageButton(320, 250, 74, 74, "2", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
@@ -877,68 +922,40 @@ class Menu:
                 if event.type == pygame.USEREVENT and event.button == level1:
                     self.fade()
                     self.level_111 = 1
-                    self.index_p = 4
-                    self.index_e = 9
-                    self.health_enemy = 5
-                    self.filename = 'test_map'
-                    self.bg = load_image('bg.png')
-                    self.hit_enemy = 1
-                    self.skel_image = load_image('Idle_enemy.png')
+                    self.levels_menu_change = 1
+                    self.levels_choice(4, 9, 5, 'test_map', 'bg.png', 1, 'Idle_enemy.png')
                     self.level_game_play = 'one'
-                    print('l1')
                     running = False
 
                 if event.type == pygame.USEREVENT and event.button == level2:
                     self.fade()
                     self.level_222 = 2
-                    self.index_p = 2
-                    self.index_e = 4
-                    self.health_enemy = 6
-                    self.filename = 'test_map1'
-                    self.bg = load_image('bg.png')
-                    self.hit_enemy = 1
-                    self.skel_image = load_image('Idle_enemy.png')
+                    self.levels_menu_change = 2
+                    self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 1, 'Idle_enemy.png')
                     self.level_game_play = 'two'
-                    print('l2')
                     running = False
 
                 if event.type == pygame.USEREVENT and event.button == level3:
                     self.fade()
                     self.level_222 = 2
-                    self.index_p = 2
-                    self.index_e = 4
-                    self.health_enemy = 6
-                    self.filename = 'test_map1'
-                    self.bg = load_image('bg.png')
-                    self.hit_enemy = 2
-                    self.skel_image = load_image('goblin1.png')
+                    self.levels_menu_change = 3
+                    self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 2, 'goblin1.png')
                     self.level_game_play = 'three'
-                    print('l3')
                     running = False
 
                 if event.type == pygame.USEREVENT and event.button == level4:
                     self.fade()
                     self.level_222 = 2
-                    self.index_p = 7
-                    self.index_e = 4
-                    self.health_enemy = 6
-                    self.filename = 'test_map2'
-                    self.bg = load_image('bg.png')
-                    self.hit_enemy = 2
-                    self.skel_image = load_image('goblin.png')
+                    self.levels_menu_change = 4
+                    self.levels_choice(7, 4, 6, 'test_map2', 'bg.png', 2, 'goblin.png')
                     self.level_game_play = 'four'
                     running = False
 
                 if event.type == pygame.USEREVENT and event.button == level5:
                     self.fade()
                     self.level_222 = 2
-                    self.index_p = 7
-                    self.index_e = 4
-                    self.health_enemy = 6.5
-                    self.filename = 'test_map2'
-                    self.bg = load_image('bg.png')
-                    self.hit_enemy = 2
-                    self.skel_image = load_image('Idle_skel_plus1.png')
+                    self.levels_menu_change = 5
+                    self.levels_choice(7, 4, 10, 'test_map2', 'bg.png', 2, 'Idle_skel_plus1.png')
                     self.level_game_play = 'five'
                     running = False
 
@@ -959,13 +976,11 @@ class Menu:
             pygame.display.flip()
 
     def menu_level(self):
-        next_level_button = ImageButton(600, 300, 74, 74, "", "next_level.jpg", "next_leve_lightl.jpg", "click.mp3")
-        previos_level_button = ImageButton(300, 300, 74, 74, "", "previos_level_button.jpg",
-                                           "previos_level_button_light.jpg", "click.mp3")
         all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "click.mp3")
         menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "click.mp3")
         victory_music.play()
         running = True
+        self.win = "win"
         while running:
             screen.fill((0, 0, 0))
             screen.blit(level_passed, (0, 0))
@@ -978,34 +993,89 @@ class Menu:
                     pygame.quit()
                     sys.exit()
 
-                if event.type == pygame.USEREVENT and event.button == next_level_button:
-                    running = False
-                    self.fade()
-                    self.next_level_button = True
-
-                if event.type == pygame.USEREVENT and event.button == previos_level_button:
-                    running = False
-                    self.fade()
-
                 if event.type == pygame.USEREVENT and event.button == all_level_button:
-                    running = False
                     self.fade()
+                    if self.player_hero == 'hero1':
+                        all_sprites = pygame.sprite.Group()
+                        self.player_choice(1, 2, 12, 11, 'hero1')
+                        self.sprite.image = load_image("Attack1_hero1.png")
+                        self.sprite.image = load_image("Attack2_hero1.png")
+                        self.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
+                        self.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
+                        self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+
+                    if self.player_hero == 'hero2':
+                        self.fade()
+                        all_sprites = pygame.sprite.Group()
+                        self.player_choice(0.8, 1.8, 8, 222, 'hero2')
+                        self.player_image = load_image('Idle.png')
+                        self.sprite.image = load_image("Attack1_hero2.png")
+                        self.sprite.image = load_image("Attack2_hero2.png")
+                        self.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
+                        self.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
+                        self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+
+                    if self.player_hero == 'hero3':
+                        self.fade()
+                        all_sprites = pygame.sprite.Group()
+                        self.player_choice(1, 2, 5, 333, 'hero3')
+                        self.player_image = load_image('Idle3.png')
+                        self.player_image2 = load_image('Idle32.png')
+                        self.sprite.image = load_image("Attack1.png")
+                        self.sprite.image = load_image("Attack2.png")
+                        self.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
+                        self.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
+                        self.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+
+                    if self.level_game_play == 'one':
+                        self.fade()
+                        self.levels_choice(4, 9, 5, 'test_map', 'bg.png', 1, 'Idle_enemy.png')
+                        running = False
+
+                    if self.level_game_play == 'two':
+                        self.fade()
+                        self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 1, 'Idle_enemy.png')
+                        running = False
+
+                    if self.level_game_play == 'three':
+                        self.fade()
+                        self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 2, 'goblin1.png')
+                        running = False
+
+                    if self.level_game_play == 'four':
+                        self.fade()
+                        self.levels_choice(7, 4, 6, 'test_map2', 'bg.png', 2, 'goblin.png')
+                        running = False
+
+                    if self.level_game_play == 'five':
+                        self.fade()
+                        self.levels_choice(7, 4, 6.5, 'test_map2', 'bg.png', 2, 'Idle_skel_plus1.png')
+                        running = False
 
                 if event.type == pygame.USEREVENT and event.button == menu_button:
                     self.fade()
+                    self.win = "win"
+                    self.w_press = True
                     self.hero_change()
                     running = False
 
-                for btn in [next_level_button, previos_level_button, all_level_button, menu_button]:
+                for btn in [all_level_button, menu_button]:
                     btn.handle_event(event)
 
-            for btn in [next_level_button, previos_level_button, all_level_button, menu_button]:
+            for btn in [all_level_button, menu_button]:
                 btn.check_cursor(pygame.mouse.get_pos())
                 btn.draw(screen)
 
             x, y = pygame.mouse.get_pos()
             screen.blit(cursor, (x, y))
             pygame.display.flip()
+
+    def player_choice(self, hit_1, hit_2, health_player, player_hero_turn, player_hero):
+        self.hit_1 = hit_1
+        self.hit_2 = hit_2
+        self.health_player = health_player
+        self.player_hero_turn = player_hero_turn
+        self.player_hero = player_hero
 
     def defeat(self):
         all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "click.mp3")
@@ -1028,12 +1098,7 @@ class Menu:
                     self.fade()
                     if self.player_hero == 'hero1':
                         all_sprites = pygame.sprite.Group()
-                        self.hit_1 = 1
-                        self.hit_2 = 2
-                        self.health_player = 12
-                        self.player_image = load_image('Idle2.png')
-                        self.player_hero_turn = 111
-                        self.player_hero = 'hero1'
+                        self.player_choice(1, 2, 12, 11, 'hero1')
                         self.sprite.image = load_image("Attack1_hero1.png")
                         self.sprite.image = load_image("Attack2_hero1.png")
                         self.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
@@ -1043,11 +1108,8 @@ class Menu:
                     if self.player_hero == 'hero2':
                         self.fade()
                         all_sprites = pygame.sprite.Group()
-                        self.health_player = 8
-                        self.hit_1 = 0.8
-                        self.hit_2 = 1.8
+                        self.player_choice(0.8, 1.8, 8, 222, 'hero2')
                         self.player_image = load_image('Idle.png')
-                        self.player_hero_turn = 222
                         self.sprite.image = load_image("Attack1_hero2.png")
                         self.sprite.image = load_image("Attack2_hero2.png")
                         self.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
@@ -1057,11 +1119,8 @@ class Menu:
                     if self.player_hero == 'hero3':
                         self.fade()
                         all_sprites = pygame.sprite.Group()
-                        self.health_player = 5
-                        self.hit_1 = 1
-                        self.hit_2 = 2
+                        self.player_choice(1, 2, 5, 333, 'hero3')
                         self.player_image = load_image('Idle3.png')
-                        self.player_hero_turn = 333
                         self.player_image2 = load_image('Idle32.png')
                         self.sprite.image = load_image("Attack1.png")
                         self.sprite.image = load_image("Attack2.png")
@@ -1071,46 +1130,33 @@ class Menu:
 
                     if self.level_game_play == 'one':
                         self.fade()
-                        self.continue_level = 'one'
-                        self.level_111 = 1
-                        self.index_p = 4
-                        self.index_e = 9
-                        self.health_enemy = 5
-                        self.filename = 'test_map'
-                        self.bg = load_image('bg.png')
-                        self.hit_enemy = 1
-                        self.skel_image = load_image('Idle_enemy.png')
-                        self.level_game_play = 'one'
+                        self.levels_choice(4, 9, 5, 'test_map', 'bg.png', 1, 'Idle_enemy.png')
                         running = False
 
                     if self.level_game_play == 'two':
                         self.fade()
-                        self.level_222 = 2
-                        self.index_p = 2
-                        self.index_e = 4
-                        self.health_enemy = 6
-                        self.filename = 'test_map1'
-                        self.bg = load_image('bg.png')
-                        self.hit_enemy = 1
-                        self.skel_image = load_image('Idle_enemy.png')
-                        self.level_game_play = 'two'
+                        self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 1, 'Idle_enemy.png')
                         running = False
 
                     if self.level_game_play == 'three':
                         self.fade()
-                        self.level_222 = 2
-                        self.index_p = 2
-                        self.index_e = 4
-                        self.health_enemy = 6
-                        self.filename = 'test_map1'
-                        self.bg = load_image('bg.png')
-                        self.hit_enemy = 2
-                        self.skel_image = load_image('goblin1.png')
-                        self.level_game_play = 'three'
+                        self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 2, 'goblin1.png')
+                        running = False
+
+                    if self.level_game_play == 'four':
+                        self.fade()
+                        self.levels_choice(7, 4, 6, 'test_map2', 'bg.png', 2, 'goblin.png')
+                        running = False
+
+                    if self.level_game_play == 'five':
+                        self.fade()
+                        self.levels_choice(7, 4, 6.5, 'test_map2', 'bg.png', 2, 'Idle_skel_plus1.png')
                         running = False
 
                 if event.type == pygame.USEREVENT and event.button == menu_button:
                     self.fade()
+                    self.w_press = True
+                    self.lose = "lose"
                     self.hero_change()
                     running = False
 
