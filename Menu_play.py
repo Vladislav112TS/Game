@@ -1,4 +1,4 @@
-mport pygame
+import pygame
 import sys
 from Button_effects import ImageButton
 import os
@@ -56,7 +56,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames)
         self.image = self.frames[self.cur_frame]
 
-
 class Menu:
     def __init__(self):
         self.main_background = load_image('shogun-showdown.jpg')
@@ -83,11 +82,12 @@ class Menu:
         self.defi = False
 
     def main_menu(self):
-        start_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Новая игра", "knop2.jpg", "knop.jpg",
-                                   "click.mp3")
-        settigs_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Настройки", "knop2.jpg", "knop.jpg",
-                                     "click.mp3")
-        exit_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Выйти", "knop2.jpg", "knop.jpg", "click.mp3")
+        start_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Новая игра",
+                                   "knop2.jpg", "knop.jpg", "click.mp3")
+        settigs_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Настройки",
+                                     "knop2.jpg", "knop.jpg", "click.mp3")
+        exit_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Выйти", "knop2.jpg",
+                                  "knop.jpg", "click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -1182,7 +1182,6 @@ class Menu:
             fade_surface.fill((0, 0, 0))
             fade_surface.set_alpha(fade_alpha)
             screen.blit(fade_surface, (0, 0))
-
             fade_alpha += 5
             if fade_alpha >= 100:
                 fade_alpha = 255
