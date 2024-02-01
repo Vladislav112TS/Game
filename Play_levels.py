@@ -159,13 +159,9 @@ def generate_level(level):
             elif level[y][x] == 's':
                 new_skel = Enemy(x, y)
                 new_string = Cell('white_string', x, y)
-            elif level[y][x] == 'd':
-                new_skel = Enemy(x, y)
-                new_string = Cell('white_string', x, y)
 
 
     return new_skel, new_player, x, y
-
 
 def skin_enemy_player():
     if my_menu.player_hero_start == 1111:
@@ -189,8 +185,7 @@ def skin_enemy_player():
 
 run = False
 all_sprites = pygame.sprite.Group()
-sprite = pygame.sprite.Sprite()
-#sprite.rect = sprite.image.get_rect()
+#sprite = pygame.sprite.Sprite()
 count = 0
 last = None
 in_mission = False
@@ -204,7 +199,8 @@ while running:
     if my_menu.filename == 'test_map':
         qwe = 2
         print('1')
-        skel, player, level_x, level_y = generate_level(load_level('play.txt'))
+        input('1')
+        skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
         my_menu.filename = 'None'
         if my_menu.w_press:
             skin_enemy_player()
@@ -214,32 +210,33 @@ while running:
         print('q')
         my_menu.win = "None"
         if my_menu.filename == 'test_map1':
-            skel, player, level_x, level_y = generate_level(load_level('play.txt'))
+            del player
+            del skel
+            del all_sprites
+            input('2')
+            all_sprites = pygame.sprite.Group()
+            skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
+            print(player, skel)
             my_menu.filename = 'None'
             if my_menu.w_press:
                 skin_enemy_player()
             my_menu.win = "los"
         if my_menu.filename == 'test_map2':
+            del player
+            del skel
+            input('3')
+
             skel, player, level_x, level_y = generate_level(load_level('play.txt'))
             my_menu.filename = 'None'
             if my_menu.w_press:
                 skin_enemy_player()
             my_menu.win = "los"
     if my_menu.lose == "lose":
-        qwe = 2
         my_menu.no_go_level()
         my_menu.lose = "None"
     if qwe == 1:
         my_menu.no_go_level()
         print('qwe')
-
-    '''if my_menu.win == "win":
-        my_menu.win = "lose"
-        if my_menu.filename == 'test_map2':
-            skel, player, level_x, level_y = generate_level(load_level('play.txt'))
-            my_menu.filename = 'None'
-'''
-
     screen.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
