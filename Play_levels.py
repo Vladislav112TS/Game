@@ -30,7 +30,7 @@ enemy_group = pygame.sprite.Group()
 cell_group = pygame.sprite.Group()
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join(name)
+    fullname = os.path.join('image', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -84,6 +84,9 @@ class Enemy(pygame.sprite.Sprite):
     def set_health_enemy(self, health):
         self.health = health
 
+    def change_skin_enemy(self, skel_image):
+        self.image = pygame.transform.scale(skel_image, (tile_width - 15, tile_height - 15))
+
     def update(self):
         if not pygame.sprite.spritecollideany(self, box_group):
             self.rect = self.rect.move(self.vx, self.vy)
@@ -101,13 +104,15 @@ class Player(pygame.sprite.Sprite):
     def set_health_player(self, health):
         self.health = health
 
+    def skin_player(self, player_image):
+        self.image = pygame.transform.scale(player_image, (tile_width - 15, tile_height - 15))
+
     def change_skin(self, player_image):
         self.image = pygame.transform.scale(player_image, (tile_width - 15, tile_height - 15))
 
     def update(self):
         if pygame.sprite.spritecollideany(self, cell_group):
             self.rect = self.rect.move(self.vx, self.vy)
-            #print('клетка')
         if pygame.sprite.spritecollideany(self, box_group):
             self.rect = self.rect.move(- self.vx, self.vy)
 
@@ -154,19 +159,33 @@ def generate_level(level):
             elif level[y][x] == 's':
                 new_skel = Enemy(x, y)
                 new_string = Cell('white_string', x, y)
-            elif level[y][x] == 'd':
-                new_skel = Enemy(x, y)
-                new_string = Cell('white_string', x, y)
 
 
     return new_skel, new_player, x, y
 
-skel, player, level_x, level_y = generate_level(load_level('play.txt'))
+def skin_enemy_player():
+    if my_menu.player_hero_start == 1111:
+        skin = load_image('Idle2.png')
+        player.skin_player(skin)
+    if my_menu.player_hero_start == 2222:
+        skin = load_image('Idle.png')
+        player.skin_player(skin)
+    if my_menu.player_hero_start == 3333:
+        skin = load_image('Idle3.png')
+        player.skin_player(skin)
+    if my_menu.levels_menu_change == 1 or my_menu.levels_menu_change == 2:
+        skel_image = load_image('Idle_enemy.png')
+        skel.change_skin_enemy(skel_image)
+    if my_menu.levels_menu_change == 3 or my_menu.levels_menu_change == 5:
+        skel_image = load_image('goblin1.png')
+        skel.change_skin_enemy(skel_image)
+    if my_menu.levels_menu_change == 5:
+        skel_image = load_image('Idle_skel_plus1.png')
+        skel.change_skin_enemy(skel_image)
 
 run = False
 all_sprites = pygame.sprite.Group()
-sprite = pygame.sprite.Sprite()
-#sprite.rect = sprite.image.get_rect()
+#sprite = pygame.sprite.Sprite()
 count = 0
 last = None
 in_mission = False
@@ -175,7 +194,49 @@ running = True
 pygame.mixer.music.load('level_music.mp3')
 pygame.mixer.music.play(-1)
 turn = 'right'
+qwe = 1
 while running:
+    if my_menu.filename == 'test_map':
+        qwe = 2
+        print('1')
+        input('1')
+        skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
+        my_menu.filename = 'None'
+        if my_menu.w_press:
+            skin_enemy_player()
+    if my_menu.win == "win":
+        qwe = 2
+        print(my_menu.win)
+        print('q')
+        my_menu.win = "None"
+        if my_menu.filename == 'test_map1':
+            del player
+            del skel
+            del all_sprites
+            input('2')
+            all_sprites = pygame.sprite.Group()
+            skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
+            print(player, skel)
+            my_menu.filename = 'None'
+            if my_menu.w_press:
+                skin_enemy_player()
+            my_menu.win = "los"
+        if my_menu.filename == 'test_map2':
+            del player
+            del skel
+            input('3')
+
+            skel, player, level_x, level_y = generate_level(load_level('play.txt'))
+            my_menu.filename = 'None'
+            if my_menu.w_press:
+                skin_enemy_player()
+            my_menu.win = "los"
+    if my_menu.lose == "lose":
+        my_menu.no_go_level()
+        my_menu.lose = "None"
+    if qwe == 1:
+        my_menu.no_go_level()
+        print('qwe')
     screen.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -200,7 +261,6 @@ while running:
                                 if my_menu.health_enemy <= 0:
                                     print('победа')
                                     my_menu.menu_level()
-                                    running = False
                             break
                         if my_menu.index_e - my_menu.index_p == 1:
                             if turn == 'right':
@@ -215,11 +275,10 @@ while running:
                                 if my_menu.health_enemy <= 0:
                                     print('победа')
                                     my_menu.menu_level()
-                                    running = False
                             break
 
                     if my_menu.player_hero == 'hero2' or my_menu.player_hero == 'hero3':
-                        if my_menu.index_p - my_menu.index_e > 1:
+                        if my_menu.index_p - my_menu.index_e >= 1:
                             if turn == 'left':
                                 my_menu.hero.update()
                                 atack_hero.play()
@@ -227,12 +286,13 @@ while running:
                                 pygame.display.flip()
                                 clock.tick(FPS)
                                 my_menu.health_enemy -= my_menu.hit_1
+                                print(my_menu.hit_1)
                                 print('урон врагу -1')
                                 if my_menu.health_enemy <= 0:
                                     print('победа')
-                                    running = False
+                                    my_menu.menu_level()
                                 break
-                        if my_menu.index_e - my_menu.index_p > 1:
+                        if my_menu.index_e - my_menu.index_p >= 1:
                             if turn == 'right':
                                 my_menu.hero.update()
                                 atack_hero.play()
@@ -240,10 +300,11 @@ while running:
                                 pygame.display.flip()
                                 clock.tick(FPS)
                                 my_menu.health_enemy -= my_menu.hit_1
+                                print(my_menu.hit_1)
                                 print('урон врагу -1')
                                 if my_menu.health_enemy <= 0:
                                     print('победа')
-                                    running = False
+                                    my_menu.menu_level()
                                 break
 
                 run = True
@@ -259,7 +320,6 @@ while running:
                     if my_menu.health_player <= 0:
                         print('поражение')
                         my_menu.defeat()
-                        running = False
                     run = False
                 if run:
                     if my_menu.index_p > my_menu.index_e:
@@ -288,7 +348,6 @@ while running:
                                     if my_menu.health_enemy <= 0:
                                         print('победа')
                                         my_menu.menu_level()
-                                        running = False
                                 break
                             if my_menu.index_e - my_menu.index_p == 1:
                                 if turn == 'right':
@@ -302,35 +361,35 @@ while running:
                                     if my_menu.health_enemy <= 0:
                                         print('победа')
                                         my_menu.menu_level()
-                                        running = False
                                 break
                         if my_menu.player_hero == 'hero2' or my_menu.player_hero == 'hero3':
-                            if my_menu.index_p - my_menu.index_e > 1:
+                            if my_menu.index_p - my_menu.index_e >= 1:
                                 if turn == 'left':
                                     my_menu.hero.update()
                                     atack_hero2.play()
                                     all_sprites.draw(screen)
                                     pygame.display.flip()
                                     clock.tick(FPS)
-                                    my_menu.health_enemy -= my_menu.hit_1
-                                    print('урон врагу -1')
+                                    my_menu.health_enemy -= my_menu.hit_2
+                                    print(my_menu.hit_2)
+                                    print('урон врагу -2')
                                     if my_menu.health_enemy <= 0:
                                         my_menu.menu_level()
                                         print('победа')
-                                        running = False
                                     break
-                            if my_menu.index_e - my_menu.index_p > 1:
+                            if my_menu.index_e - my_menu.index_p >= 1:
                                 if turn == 'right':
                                     my_menu.hero.update()
                                     atack_hero.play()
                                     all_sprites.draw(screen)
                                     pygame.display.flip()
                                     clock.tick(FPS)
-                                    my_menu.health_enemy -= my_menu.hit_1
-                                    print('урон врагу -1')
+                                    my_menu.health_enemy -= my_menu.hit_2
+                                    print(my_menu.hit_2)
+                                    print('урон врагу -2')
                                     if my_menu.health_enemy <= 0:
                                         print('победа')
-                                        running = False
+                                        my_menu.menu_level()
                                     break
 
                         run = True
@@ -344,12 +403,8 @@ while running:
                         clock.tick(FPS)
                         print('урон игроку')
                         if my_menu.health_player <= 0:
-                            #music_paused = not music_paused
-                            #if music_paused:
-                             #   pygame.mixer.music.pause()
                             print('поражение')
                             my_menu.defeat()
-                            running = False
                         run = False
                     if run:
                         if my_menu.index_p > my_menu.index_e:
@@ -362,7 +417,7 @@ while running:
                             enemy_group.update()
                         run = False
 
-            if 1 < my_menu.index_p <= 10 and my_menu.index_p - my_menu.index_e != 1:
+            if 1 < my_menu.index_p < 9 and my_menu.index_p - my_menu.index_e != 1:
                 if event.key == pygame.K_a:
                     my_menu.index_p -= 1
                     player.vx = -STEP
@@ -379,11 +434,7 @@ while running:
                         print('урон игроку')
                         if my_menu.health_player <= 0:
                             print('поражение')
-                            music_paused = not music_paused
-                            #if music_paused:
-                               # pygame.mixer.music.pause()
-                            #my_menu.defeat()
-                            running = False
+                            my_menu.defeat()
                         run = False
                     if run:
                         if my_menu.index_p > my_menu.index_e:
@@ -396,7 +447,7 @@ while running:
                             enemy_group.update()
                         run = False
 
-            if 1 <= my_menu.index_p < 10 and my_menu.index_e - my_menu.index_p != 1:
+            if 1 <= my_menu.index_p < 9 and my_menu.index_e - my_menu.index_p != 1:
                 if event.key == pygame.K_d:
                     my_menu.index_p += 1
                     player.vx = STEP
@@ -413,11 +464,7 @@ while running:
                         print('урон игроку')
                         if my_menu.health_player <= 0:
                             print('поражение')
-                            #music_paused = not music_paused
-                            #if music_paused:
-                              #  pygame.mixer.music.pause()
                             my_menu.defeat()
-                            running = False
                         run = False
                     if run:
                         if my_menu.index_p > my_menu.index_e:
@@ -431,6 +478,7 @@ while running:
                         run = False
 
             if event.key == pygame.K_w:
+                my_menu.w_press = False
                 if my_menu.player_hero_turn == 111:
                     player_image = load_image('Idle22.png')
                     player.change_skin(player_image)
@@ -455,9 +503,7 @@ while running:
                     print('урон игроку')
                     if my_menu.health_player <= 0:
                         print('поражение')
-                        music_paused = not music_paused
-                        if my_menu.defi == True:
-                            running = True
+                        my_menu.defeat()
                     run = False
                 if run:
                     if my_menu.index_p > my_menu.index_e:
@@ -484,10 +530,7 @@ while running:
                     print('урон игроку')
                     if my_menu.health_player <= 0:
                         print('поражение')
-                        music_paused = not music_paused
-                        running = False
-                        if my_menu.defi == True:
-                            running = True
+                        my_menu.defeat()
                     run = False
                 if run:
                     if my_menu.index_p > my_menu.index_e:
@@ -501,8 +544,6 @@ while running:
                     run = False
 
                 if event.key == pygame.K_UP:
-                    pass
-                if event.key == pygame.K_DOWN:
                     pass
 
     all_sprites.draw(screen)
