@@ -3,6 +3,9 @@ import sys
 from Button_effects import ImageButton
 import os
 
+from pygame.mixer import Sound
+
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('image', name)
     if not os.path.isfile(fullname):
@@ -30,8 +33,8 @@ level_passed = load_image('level_passed.jpg')
 clock = pygame.time.Clock()
 cursor = load_image('cursor.png')
 pygame.mouse.set_visible(False)
-victory_music = pygame.mixer.Sound('db344f8d1a8d5b5.ogg')
-loss_music = pygame.mixer.Sound('z_uki-mech-_-telo.ogg')
+victory_music = pygame.mixer.Sound('music/win_music.ogg')
+loss_music: Sound = pygame.mixer.Sound('music/game_over_music.ogg')
 all_sprites = pygame.sprite.Group()
 
 class AnimatedSprite(pygame.sprite.Sprite):
@@ -77,17 +80,17 @@ class Menu:
         self.all_sprites = pygame.sprite.Group()
         self.w_press = True
         self.num = 1
-        pygame.mixer.music.load('menu_music.mp3')
+        pygame.mixer.music.load('music/menu_music.mp3')
         pygame.mixer.music.play(-1)
         self.defi = False
 
     def main_menu(self):
         start_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Новая игра",
-                                   "knop2.jpg", "knop.jpg", "click.mp3")
+                                   "knop2.jpg", "knop.jpg", "music/click.mp3")
         settigs_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Настройки",
-                                     "knop2.jpg", "knop.jpg", "click.mp3")
+                                     "knop2.jpg", "knop.jpg", "music/click.mp3")
         exit_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Выйти", "knop2.jpg",
-                                  "knop.jpg", "click.mp3")
+                                  "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -128,7 +131,7 @@ class Menu:
 
     def no_go_level(self):
         menu_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 300, 74, "Вернуться в меню", "knop2.jpg", "knop.jpg",
-                                   "click.mp3")
+                                   "music/click.mp3")
 
         running = True
         while running:
@@ -166,18 +169,18 @@ class Menu:
             pygame.display.flip()
 
     def settigs_menu(self):
-        audio_button = ImageButton(WIDTH / 2 - (252 / 2), 150, 252, 74, "Звук", "knop2.jpg", "knop.jpg", "click.mp3")
+        audio_button = ImageButton(WIDTH / 2 - (252 / 2), 150, 252, 74, "Звук", "knop2.jpg", "knop.jpg", "music/click.mp3")
         pravila_button = ImageButton(WIDTH / 2 - (252 / 2), 250, 252, 74, "Правила игры", "knop2.jpg", "knop.jpg",
-                                     "click.mp3")
+                                     "music/click.mp3")
         infa_enemy_button = ImageButton(WIDTH / 2 - (252 / 2), 350, 252, 74, "Враги", "knop2.jpg", "knop.jpg",
-                                        "click.mp3")
-        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+                                        "music/click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
             screen.blit(main_background, (0, -200))
 
-            font = pygame.font.Font(None, 72)  # размер текста
+            font = pygame.font.Font(None, 72)
             text_surface = font.render('Настройки', True, (255, 255, 255))
             text_rect = text_surface.get_rect(center=(460, 50))
             screen.blit(text_surface, text_rect)
@@ -219,7 +222,7 @@ class Menu:
             pygame.display.flip()
 
     def pravil_game(self):
-        back_button = ImageButton(WIDTH / 2 - (252 / 2), 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -307,10 +310,10 @@ class Menu:
             pygame.display.flip()
 
     def hero_change(self):
-        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle2.png", "Idle2.png", "click.mp3")
-        hero2_button = ImageButton(350, 150, 252, 252, "", "Idle.png", "Idle.png", "click.mp3")
-        hero3_button = ImageButton(600, 150, 252, 252, "", "Idle3.png", "Idle3.png", "click.mp3")
-        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle2.png", "Idle2.png", "music/click.mp3")
+        hero2_button = ImageButton(350, 150, 252, 252, "", "Idle.png", "Idle.png", "music/click.mp3")
+        hero3_button = ImageButton(600, 150, 252, 252, "", "Idle3.png", "Idle3.png", "music/click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -356,9 +359,9 @@ class Menu:
             pygame.display.flip()
 
     def menu_hero1(self):
-        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle2.png", "Idle2.png", "click.mp3")
-        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "click.mp3")
-        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle2.png", "Idle2.png", "music/click.mp3")
+        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "music/click.mp3")
+        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -432,9 +435,9 @@ class Menu:
             pygame.display.flip()
 
     def menu_hero2(self):
-        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle.png", "Idle.png", "click.mp3")
-        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "click.mp3")
-        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle.png", "Idle.png", "music/click.mp3")
+        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "music/click.mp3")
+        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -509,9 +512,9 @@ class Menu:
             pygame.display.flip()
 
     def menu_hero3(self):
-        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle3.png", "Idle3.png", "click.mp3")
-        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "click.mp3")
-        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        hero1_button = ImageButton(100, 150, 252, 252, "", "Idle3.png", "Idle3.png", "music/click.mp3")
+        choice_button = ImageButton(625, 500, 252, 74, "Выбрать", "knop2.jpg", "knop.jpg", "music/click.mp3")
+        back_button = ImageButton(50, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -586,9 +589,9 @@ class Menu:
             pygame.display.flip()
 
     def music_fon(self):
-        off_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Включить", "knop2.jpg", "knop.jpg", "click.mp3")
-        on_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Выключить", "knop2.jpg", "knop.jpg", "click.mp3")
-        back_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        off_button = ImageButton(WIDTH / 2 - (252 / 2), 200, 252, 74, "Включить", "knop2.jpg", "knop.jpg", "music/click.mp3")
+        on_button = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Выключить", "knop2.jpg", "knop.jpg", "music/click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -629,9 +632,9 @@ class Menu:
             pygame.display.flip()
 
     def new_game(self):
-        back_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 400, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         start_new_game = ImageButton(WIDTH / 2 - (252 / 2), 300, 252, 74, "Играть", "knop2.jpg", "knop.jpg",
-                                     "click.mp3")
+                                     "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -668,10 +671,10 @@ class Menu:
             pygame.display.flip()
 
     def enemy(self):
-        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy.png", "Idle_enemy.png", "click.mp3")
-        enemy2_button = ImageButton(330, 150, 252, 252, "", "goblin1.png", "goblin1.png", "click.mp3")
-        enemy3_button = ImageButton(600, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "click.mp3")
-        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy.png", "Idle_enemy.png", "music/click.mp3")
+        enemy2_button = ImageButton(330, 150, 252, 252, "", "goblin1.png", "goblin1.png", "music/click.mp3")
+        enemy3_button = ImageButton(600, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "music/click.mp3")
+        back_button = ImageButton(WIDTH / 2 - (252 / 2), 450, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -718,8 +721,8 @@ class Menu:
             pygame.display.flip()
 
     def menu_enemy1(self):
-        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy1.png", "Idle_enemy1.png", "click.mp3")
-        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_enemy1.png", "Idle_enemy1.png", "music/click.mp3")
+        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -775,8 +778,8 @@ class Menu:
             pygame.display.flip()
 
     def menu_enemy2(self):
-        enemy1_button = ImageButton(100, 150, 252, 252, "", "goblin1.png", "goblin1.png", "click.mp3")
-        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "goblin1.png", "goblin1.png", "music/click.mp3")
+        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -832,8 +835,8 @@ class Menu:
             pygame.display.flip()
 
     def menu_enemy3(self):
-        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "click.mp3")
-        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        enemy1_button = ImageButton(100, 150, 252, 252, "", "Idle_skel_plus1.png", "Idle_skel_plus1.png", "music/click.mp3")
+        back_button = ImageButton(350, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -900,12 +903,12 @@ class Menu:
         self.skel_image = load_image(skel_image)
 
     def play(self):
-        level1 = ImageButton(220, 250, 74, 74, "1", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
-        level2 = ImageButton(320, 250, 74, 74, "2", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
-        level3 = ImageButton(420, 250, 74, 74, "3", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
-        level4 = ImageButton(520, 250, 74, 74, "4", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
-        level5 = ImageButton(620, 250, 74, 74, "5", "level_knop1.jpg", "level_knop2.jpg", "click.mp3")
-        back_button = ImageButton(700, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "click.mp3")
+        level1 = ImageButton(220, 250, 74, 74, "1", "level_knop1.jpg", "level_knop2.jpg", "music/click.mp3")
+        level2 = ImageButton(320, 250, 74, 74, "2", "level_knop1.jpg", "level_knop2.jpg", "music/click.mp3")
+        level3 = ImageButton(420, 250, 74, 74, "3", "level_knop1.jpg", "level_knop2.jpg", "music/click.mp3")
+        level4 = ImageButton(520, 250, 74, 74, "4", "level_knop1.jpg", "level_knop2.jpg", "music/click.mp3")
+        level5 = ImageButton(620, 250, 74, 74, "5", "level_knop1.jpg", "level_knop2.jpg", "music/click.mp3")
+        back_button = ImageButton(700, 500, 252, 74, "Назад", "knop2.jpg", "knop.jpg", "music/click.mp3")
         running = True
         while running:
             screen.fill((0, 0, 0))
@@ -923,7 +926,7 @@ class Menu:
                     self.fade()
                     self.level_111 = 1
                     self.levels_menu_change = 1
-                    self.levels_choice(4, 9, 5, 'test_map', 'bg.png', 1, 'Idle_enemy.png')
+                    self.levels_choice(4, 9, 5, 'levels/test_map', 'bg.png', 1, 'Idle_enemy.png')
                     self.level_game_play = 'one'
                     running = False
 
@@ -931,7 +934,7 @@ class Menu:
                     self.fade()
                     self.level_222 = 2
                     self.levels_menu_change = 2
-                    self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 1, 'Idle_enemy.png')
+                    self.levels_choice(2, 4, 6, 'levels/test_map1', 'bg.png', 1, 'Idle_enemy.png')
                     self.level_game_play = 'two'
                     running = False
 
@@ -939,7 +942,7 @@ class Menu:
                     self.fade()
                     self.level_222 = 2
                     self.levels_menu_change = 3
-                    self.levels_choice(2, 4, 6, 'test_map1', 'bg.png', 2, 'goblin1.png')
+                    self.levels_choice(2, 4, 6, 'levels/test_map1', 'bg.png', 2, 'goblin1.png')
                     self.level_game_play = 'three'
                     running = False
 
@@ -947,7 +950,7 @@ class Menu:
                     self.fade()
                     self.level_222 = 2
                     self.levels_menu_change = 4
-                    self.levels_choice(7, 4, 6, 'test_map2', 'bg.png', 2, 'goblin.png')
+                    self.levels_choice(7, 4, 6, 'levels/test_map2', 'bg.png', 2, 'goblin.png')
                     self.level_game_play = 'four'
                     running = False
 
@@ -955,7 +958,7 @@ class Menu:
                     self.fade()
                     self.level_222 = 2
                     self.levels_menu_change = 5
-                    self.levels_choice(7, 4, 10, 'test_map2', 'bg.png', 2, 'Idle_skel_plus1.png')
+                    self.levels_choice(7, 4, 10, 'levels/test_map2', 'bg.png', 2, 'Idle_skel_plus1.png')
                     self.level_game_play = 'five'
                     running = False
 
@@ -976,8 +979,8 @@ class Menu:
             pygame.display.flip()
 
     def menu_level(self):
-        all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "click.mp3")
-        menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "click.mp3")
+        all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "music/click.mp3")
+        menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "music/click.mp3")
         victory_music.play()
         running = True
         self.win = "win"
@@ -1078,8 +1081,8 @@ class Menu:
         self.player_hero = player_hero
 
     def defeat(self):
-        all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "click.mp3")
-        menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "click.mp3")
+        all_level_button = ImageButton(400, 300, 74, 74, "", "again_button.jpg", "again_button_light.jpg", "music/click.mp3")
+        menu_button = ImageButton(500, 300, 74, 74, "", "menu_button.jpg", "menu_button_light.jpg", "music/click.mp3")
         loss_music.play()
         running = True
         while running:
@@ -1189,4 +1192,3 @@ class Menu:
 
             pygame.display.flip()
             clock.tick(MAX_FPS)
-
