@@ -17,11 +17,11 @@ FPS1 = 30
 clock = pygame.time.Clock()
 player = None
 skel = None
-atack_enemy = pygame.mixer.Sound('43bdd5ee5d8bd1f.ogg')
-atack_hero = pygame.mixer.Sound('d2ba7c5b783d309.ogg')
-atack_hero2 = pygame.mixer.Sound('b387e6976b28d15.ogg')
-atack_hero3 = pygame.mixer.Sound('razrezayuschiy-udar-mechom.ogg')
-atack_hero4 = pygame.mixer.Sound('promah-pri-boe-na-mechah.ogg')
+atack_enemy = pygame.mixer.Sound('music/atack_enemy.ogg')
+atack_hero = pygame.mixer.Sound('music/atack_hero.ogg')
+atack_hero2 = pygame.mixer.Sound('music/atack_hero2.ogg')
+atack_hero3 = pygame.mixer.Sound('music/atack_hero3.ogg')
+atack_hero4 = pygame.mixer.Sound('music/atack_hero4.ogg')
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -191,41 +191,28 @@ last = None
 in_mission = False
 music_paused = False
 running = True
-pygame.mixer.music.load('level_music.mp3')
+pygame.mixer.music.load('music/level_music.mp3')
 pygame.mixer.music.play(-1)
 turn = 'right'
 qwe = 1
 while running:
-    if my_menu.filename == 'test_map':
+    if my_menu.filename == 'levels/test_map':
         qwe = 2
-        print('1')
-        input('1')
         skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
         my_menu.filename = 'None'
         if my_menu.w_press:
             skin_enemy_player()
     if my_menu.win == "win":
         qwe = 2
-        print(my_menu.win)
-        print('q')
         my_menu.win = "None"
-        if my_menu.filename == 'test_map1':
-            del player
-            del skel
-            del all_sprites
-            input('2')
+        if my_menu.filename == 'levels/test_map1':
             all_sprites = pygame.sprite.Group()
             skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
-            print(player, skel)
             my_menu.filename = 'None'
             if my_menu.w_press:
                 skin_enemy_player()
             my_menu.win = "los"
-        if my_menu.filename == 'test_map2':
-            del player
-            del skel
-            input('3')
-
+        if my_menu.filename == 'levels/test_map2':
             skel, player, level_x, level_y = generate_level(load_level('play.txt'))
             my_menu.filename = 'None'
             if my_menu.w_press:
@@ -236,7 +223,6 @@ while running:
         my_menu.lose = "None"
     if qwe == 1:
         my_menu.no_go_level()
-        print('qwe')
     screen.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
