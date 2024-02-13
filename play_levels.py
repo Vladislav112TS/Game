@@ -1,7 +1,7 @@
 import pygame
 import sys
 import os
-from Menu_play import Menu
+from menu_play import Menu
 
 
 pygame.init()
@@ -160,7 +160,6 @@ def generate_level(level):
                 new_skel = Enemy(x, y)
                 new_string = Cell('white_string', x, y)
 
-
     return new_skel, new_player, x, y
 
 def skin_enemy_player():
@@ -198,6 +197,8 @@ qwe = 1
 while running:
     if my_menu.filename == 'levels/test_map':
         qwe = 2
+        del skel
+        del player
         skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
         my_menu.filename = 'None'
         if my_menu.w_press:
@@ -207,12 +208,16 @@ while running:
         my_menu.win = "None"
         if my_menu.filename == 'levels/test_map1':
             all_sprites = pygame.sprite.Group()
+            del skel
+            del player
             skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
             my_menu.filename = 'None'
             if my_menu.w_press:
                 skin_enemy_player()
             my_menu.win = "los"
         if my_menu.filename == 'levels/test_map2':
+            del skel
+            del player
             skel, player, level_x, level_y = generate_level(load_level('play.txt'))
             my_menu.filename = 'None'
             if my_menu.w_press:

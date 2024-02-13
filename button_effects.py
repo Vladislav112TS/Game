@@ -39,7 +39,7 @@ class ImageButton:
 
     def draw(self, screen):
         #если мышка наведена на кнопку то отображаем картинку
-        #при наведении, если нет то отображаем другую картинку
+        #при наведение, если нет то отображаем другую картинку
         current_image = self.image_cursor if self.is_hovered else self.image
         screen.blit(current_image, self.rect.topleft)
 

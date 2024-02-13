@@ -1,6 +1,6 @@
 import pygame
 import sys
-from Button_effects import ImageButton
+from button_effects import ImageButton
 import os
 
 from pygame.mixer import Sound
@@ -1192,3 +1192,4 @@ class Menu:
 
             pygame.display.flip()
             clock.tick(MAX_FPS)
+
