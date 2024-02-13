@@ -1192,4 +1192,3 @@ class Menu:
 
             pygame.display.flip()
             clock.tick(MAX_FPS)
-

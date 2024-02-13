@@ -17,11 +17,11 @@ FPS1 = 30
 clock = pygame.time.Clock()
 player = None
 skel = None
-atack_enemy = pygame.mixer.Sound('music/atack_enemy.ogg')
 atack_hero = pygame.mixer.Sound('music/atack_hero.ogg')
 atack_hero2 = pygame.mixer.Sound('music/atack_hero2.ogg')
 atack_hero3 = pygame.mixer.Sound('music/atack_hero3.ogg')
 atack_hero4 = pygame.mixer.Sound('music/atack_hero4.ogg')
+atack_enemy = pygame.mixer.Sound('music/atack_enemy.ogg')
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -184,7 +184,6 @@ def skin_enemy_player():
 
 run = False
 all_sprites = pygame.sprite.Group()
-#sprite = pygame.sprite.Sprite()
 count = 0
 last = None
 in_mission = False
@@ -199,18 +198,49 @@ while running:
         qwe = 2
         del skel
         del player
+        del my_menu.hero
+        del my_menu.hero2
+        del my_menu.enemy
         skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
+        if my_menu.player_hero == 'hero1':
+            my_menu.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
+            my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
+            my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+        if my_menu.player_hero == 'hero2':
+            my_menu.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
+            my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
+            my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+        if my_menu.player_hero == 'hero3':
+            my_menu.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
+            my_menu.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
+            my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
         my_menu.filename = 'None'
         if my_menu.w_press:
             skin_enemy_player()
     if my_menu.win == "win":
         qwe = 2
         my_menu.win = "None"
+
         if my_menu.filename == 'levels/test_map1':
             all_sprites = pygame.sprite.Group()
             del skel
             del player
+            del my_menu.hero
+            del my_menu.hero2
+            del my_menu.enemy
             skel, player, level_x, level_y = generate_level(load_level(my_menu.filename))
+            if my_menu.player_hero == 'hero1':
+                my_menu.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
+                my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
+                my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            if my_menu.player_hero == 'hero2':
+                my_menu.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
+                my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
+                my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            if my_menu.player_hero == 'hero3':
+                my_menu.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
+                my_menu.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
+                my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
             my_menu.filename = 'None'
             if my_menu.w_press:
                 skin_enemy_player()
@@ -218,7 +248,22 @@ while running:
         if my_menu.filename == 'levels/test_map2':
             del skel
             del player
+            del my_menu.hero
+            del my_menu.hero2
+            del my_menu.enemy
             skel, player, level_x, level_y = generate_level(load_level('play.txt'))
+            if my_menu.player_hero == 'hero1':
+                my_menu.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
+                my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
+                my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            if my_menu.player_hero == 'hero2':
+                my_menu.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
+                my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
+                my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            if my_menu.player_hero == 'hero3':
+                my_menu.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
+                my_menu.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
+                my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
             my_menu.filename = 'None'
             if my_menu.w_press:
                 skin_enemy_player()
