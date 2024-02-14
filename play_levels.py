@@ -206,14 +206,20 @@ while running:
             my_menu.hero = AnimatedSprite(load_image("Attack1_hero1.png"), 8, 1, 400, 300)
             my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero1.png"), 8, 1, 400, 300)
             my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            del my_menu.player_image
+            del my_menu.skel_image
         if my_menu.player_hero == 'hero2':
             my_menu.hero = AnimatedSprite(load_image("Attack1_hero2.png"), 8, 1, 400, 300)
             my_menu.hero2 = AnimatedSprite(load_image("Attack2_hero2.png"), 8, 1, 400, 300)
             my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            del my_menu.player_image
+            del my_menu.skel_image
         if my_menu.player_hero == 'hero3':
             my_menu.hero = AnimatedSprite(load_image("Attack1.png"), 8, 1, 400, 300)
             my_menu.hero2 = AnimatedSprite(load_image("Attack2.png"), 8, 1, 400, 300)
             my_menu.enemy = AnimatedSprite(load_image("Runattack.png"), 8, 1, 400, 300)
+            del my_menu.player_image
+            del my_menu.skel_image
         my_menu.filename = 'None'
         if my_menu.w_press:
             skin_enemy_player()
@@ -273,6 +279,7 @@ while running:
         my_menu.lose = "None"
     if qwe == 1:
         my_menu.no_go_level()
+
     screen.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

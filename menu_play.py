@@ -639,7 +639,7 @@ class Menu:
         while running:
             screen.fill((0, 0, 0))
             screen.blit(main_background, (0, 0))
-            font = pygame.font.Font(None, 72)  # размер текста
+            font = pygame.font.Font(None, 72)
             text_surface = font.render('Добро пожаловать в игру!', True, (255, 255, 255))
             text_rect = text_surface.get_rect(center=(400, 50))
             screen.blit(text_surface, text_rect)
@@ -663,7 +663,7 @@ class Menu:
                     btn.handle_event(event)
 
             for btn in [start_new_game, back_button]:
-                btn.check_cursor(pygame.mouse.get_pos())  # !
+                btn.check_cursor(pygame.mouse.get_pos())
                 btn.draw(screen)
 
             x, y = pygame.mouse.get_pos()
