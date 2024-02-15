@@ -96,7 +96,7 @@ class Menu:
             screen.fill((0, 0, 0))
             screen.blit(main_background, (0, 0))
             font = pygame.font.Font(None, 72)
-            text_surface = font.render('Shogun Showdown', True, (255, 255, 255))
+            text_surface = font.render('Hero adventures', True, (255, 255, 255))
             text_rect = text_surface.get_rect(center=(460, 50))
             screen.blit(text_surface, text_rect)
             for event in pygame.event.get():
@@ -112,6 +112,7 @@ class Menu:
                 if event.type == pygame.USEREVENT and event.button == settigs_button:
                     self.fade()
                     self.settigs_menu()
+                    self.filename = "None"
                     running = False
 
                 if event.type == pygame.USEREVENT and event.button == exit_button:
