@@ -29,6 +29,7 @@ pygame.display.set_caption("shogun showdown")
 main_background = load_image('shogun-showdown.jpg')
 main_background2 = load_image('main_background2.jpg')
 main_background3 = load_image('main_background3.jpg')
+win_game = load_image('win_game.jpg')
 level_passed = load_image('level_passed.jpg')
 clock = pygame.time.Clock()
 cursor = load_image('cursor.png')
@@ -80,6 +81,7 @@ class Menu:
         self.all_sprites = pygame.sprite.Group()
         self.w_press = True
         self.num = 1
+        self.const_win = 'No'
         pygame.mixer.music.load('music/menu_music.mp3')
         pygame.mixer.music.play(-1)
         self.defi = False
@@ -959,6 +961,7 @@ class Menu:
                     self.fade()
                     self.level_222 = 2
                     self.levels_menu_change = 5
+                    self.const_win = 'None'
                     self.levels_choice(7, 4, 10, 'levels/test_map2', 'bg.png', 2, 'Idle_skel_plus1.png')
                     self.level_game_play = 'five'
                     running = False
@@ -992,6 +995,10 @@ class Menu:
             text_surface = font.render('Уровень пройден!', True, (255, 255, 255))
             text_rect = text_surface.get_rect(center=(500, 55))
             screen.blit(text_surface, text_rect)
+            if self.const_win == 'None':
+                self.win_play()
+                self.const_win = 'No'
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -1168,6 +1175,46 @@ class Menu:
                     btn.handle_event(event)
 
             for btn in [all_level_button, menu_button]:
+                btn.check_cursor(pygame.mouse.get_pos())
+                btn.draw(screen)
+
+            x, y = pygame.mouse.get_pos()
+            screen.blit(cursor, (x, y))
+            pygame.display.flip()
+    def win_play(self):
+        menu_button = ImageButton(WIDTH / 2 - (252 / 2), 350, 252, 74, "Вернуться в меню", "knop2.jpg", "knop.jpg", "music/click.mp3")
+        victory_music.play()
+        running = True
+        self.win = "win"
+        while running:
+            screen.fill((0, 0, 0))
+            screen.blit(win_game, (0, 0))
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Поздравляем!', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 55))
+            screen.blit(text_surface, text_rect)
+
+            font = pygame.font.Font(None, 72)
+            text_surface = font.render('Вы прошли игру!', True, (255, 255, 255))
+            text_rect = text_surface.get_rect(center=(500, 255))
+            screen.blit(text_surface, text_rect)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+                if event.type == pygame.USEREVENT and event.button == menu_button:
+                    self.fade()
+                    self.win = "win"
+                    self.w_press = True
+                    self.main_menu()
+                    running = False
+
+                for btn in [menu_button]:
+                    btn.handle_event(event)
+
+            for btn in [menu_button]:
                 btn.check_cursor(pygame.mouse.get_pos())
                 btn.draw(screen)
 
