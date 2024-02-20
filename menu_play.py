@@ -1181,6 +1181,7 @@ class Menu:
             x, y = pygame.mouse.get_pos()
             screen.blit(cursor, (x, y))
             pygame.display.flip()
+            
     def win_play(self): #срабатывает когда пройден последний уровень
         menu_button = ImageButton(WIDTH / 2 - (252 / 2), 350, 252, 74, "Вернуться в меню", "knop2.jpg", "knop.jpg", "music/click.mp3")
         victory_music.play()
